@@ -8,38 +8,40 @@
 using namespace std;
 using namespace chrono;
 
-using frame = duration<int32_t, ratio<1,66>>;
-using ms = duration<float,milli>;
 
 struct Ball{
     double VelX, VelY, centerX, centerY, r;
     Ball(double startVelx, double startVelY, double startX, double startY, double r);
 };
 
+
 struct player{
     double x1, y1;
     player(double startx1, double starty1);
 };
+
 Ball::Ball(double startVelX, double startVelY, double startX, double startY, double startR){
-        if (startVelY == 0) {
-            VelY = 0.5    ;
-        }
-        else
-            VelY = -0.5;
-        if (startVelX == 0) {
-            VelX = 0.011;
-        }
-        else
-            VelX = -0.011;
-        centerX = startX;
-        centerY = startY;
-        r = startR;
+    if (startVelY == 0) {
+        VelY = 0.25;
     }
+    else
+        VelY = -0.25;
+    if (startVelX == 0) {
+        VelX = 0.011;
+    }
+    else
+        VelX = -0.011;
+    centerX = startX;
+    centerY = startY;
+    r = startR;
+}
+
 
 player::player(double startx1, double starty1){
     x1 = startx1;
     y1 = starty1;
 }
+
 
 void DrawCircle(SDL_Renderer * Render, double centerX, double centerY, double radius)
 {
@@ -67,7 +69,7 @@ void DrawCircle(SDL_Renderer * Render, double centerX, double centerY, double ra
         if (error > 0) {
             --x;
             tx += 2;
-           error += (tx - diameter);
+            error += (tx - diameter);
         }
     }
 }
@@ -82,8 +84,6 @@ int main(int argc, char* args[])
     player p2(SCREEN_WIDTH/2 - 125/2, 660);
     Ball cum(rand() % 2,rand() % 2,SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 15);
     while( !quit ) {
-        time_point<steady_clock> fpsTimer(steady_clock::now());
-        frame FPS{};
         SDL_Event e;
         while (SDL_PollEvent(&e) != 0) {
 
@@ -94,16 +94,16 @@ int main(int argc, char* args[])
 
 
             const Uint8 *currentKeyStates = SDL_GetKeyboardState(NULL);
-            if (currentKeyStates[SDL_SCANCODE_LEFT]) {
+            if (currentKeyStates[SDL_SCANCODE_A]) {
                 p1.x1 -= 10;
             }
-            if (currentKeyStates[SDL_SCANCODE_RIGHT]) {
+            if (currentKeyStates[SDL_SCANCODE_D]) {
                 p1.x1 += 10;
             }
-            if (currentKeyStates[SDL_SCANCODE_A]) {
+            if (currentKeyStates[SDL_SCANCODE_LEFT]) {
                 p2.x1 -= 10;
             }
-            if (currentKeyStates[SDL_SCANCODE_D]) {
+            if (currentKeyStates[SDL_SCANCODE_RIGHT]) {
                 p2.x1 += 10;
             }
 
@@ -126,17 +126,17 @@ int main(int argc, char* args[])
         if (p1.x1 - 10 < cum.centerX and p1.x1 + 135 > cum.centerX and cum.centerY == 50) {
             cum.VelY = -cum.VelY;
             if (p1.x1 - 10 < cum.centerX and p1.x1 + 62.5 > cum.centerX) {
-                cum.VelX = -0.05 - rand() % 20 * 0.01;
+                cum.VelX = -0.05 - rand() % 5 * 0.01;
             } else {
-                cum.VelX = 0.05 + rand() % 20 * 0.01;
+                cum.VelX = 0.05 + rand() % 5 * 0.01;
             }
         }
-        if (p2.x1 - 10 < cum.centerX and p2.x1 + 135 > cum.centerX and cum.centerY  == 645) {
+        if (p2.x1 - 10 < cum.centerX and p2.x1 + 135 > cum.centerX and cum.centerY == 645) {
             cum.VelY = -cum.VelY;
             if (p2.x1 - 10 < cum.centerX and p2.x1 + 62.5 > cum.centerX) {
-                cum.VelX = -0.05 - rand() % 20 * 0.01;
+                cum.VelX = -0.01 - rand() % 5 * 0.01;
             } else {
-                cum.VelX = 0.05 + rand() % 20 * 0.01;
+                cum.VelX = 0.01 + rand() % 5 * 0.01;
             }
         }
         SDL_SetRenderDrawColor(Render, 0, 0, 0, 255);
@@ -152,20 +152,11 @@ int main(int argc, char* args[])
         SDL_RenderPresent(Render);
         const Uint8 *currentKeyStates = SDL_GetKeyboardState(NULL);
         if (currentKeyStates[SDL_SCANCODE_R] and (cum.centerY < 50 or cum.centerY > 645)){
-        cum.centerY = SCREEN_HEIGHT / 2;
-        cum.centerX = SCREEN_WIDTH / 2;
-}
-
-        while (true)
-        {
-            FPS = duration_cast<frame>(steady_clock::now() - fpsTimer);
-
-            if (FPS.count() >= 1) {
-                fpsTimer = steady_clock::now();
-            }
-        break;
-            }
+            cum.centerY = SCREEN_HEIGHT / 2;
+            cum.centerX = SCREEN_WIDTH / 2;
+            cum.VelX = 0;
         }
+    }
 
 
     SDL_DestroyWindow( Screen );
